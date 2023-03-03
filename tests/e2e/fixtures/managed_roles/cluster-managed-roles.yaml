@@ -1,0 +1,29 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-example-with-roles
+spec:
+  instances: 3
+
+  storage:
+    size: 1Gi
+
+  managed:
+    roles:
+    - name: edb_admin
+      ensure: present
+      comment: my database-side comment
+      login: true
+      superuser: false
+      createdb: true
+      createrole: false
+      inherit: false
+      replication: false
+      bypassrls: false
+      connectionLimit: 4
+      validUntil: "2023-04-12"
+      inRoles:
+        - pg_monitor
+        - pg_signal_backend
+      passwordSecret:
+        name: cluster-example-edbadmin
