@@ -64,17 +64,14 @@ var _ = Describe("Managed roles tests", Label(tests.LabelSmoke, tests.LabelBasic
 
 			By("ensuring the role created in the managed stanza is in the database", func() {
 				primaryDst := clusterName + "-1"
-
-				By("querying the tables via psql", func() {
-					cmd := `psql -U postgres postgres -tAc '\du'`
-					stdout, _, err := utils.Run(fmt.Sprintf(
-						"kubectl exec -n %v %v -- %v",
-						namespace,
-						primaryDst,
-						cmd))
-					Expect(err).ToNot(HaveOccurred())
-					Expect(stdout).To(ContainSubstring("edb_admin"))
-				})
+				cmd := `psql -U postgres postgres -tAc '\du'`
+				stdout, _, err := utils.Run(fmt.Sprintf(
+					"kubectl exec -n %v %v -- %v",
+					namespace,
+					primaryDst,
+					cmd))
+				Expect(err).ToNot(HaveOccurred())
+				Expect(stdout).To(ContainSubstring("edb_admin"))
 			})
 		})
 	})
