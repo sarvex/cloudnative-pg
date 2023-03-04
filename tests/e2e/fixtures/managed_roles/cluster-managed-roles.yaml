@@ -3,7 +3,7 @@ kind: Cluster
 metadata:
   name: cluster-example-with-roles
 spec:
-  instances: 3
+  instances: 1 # this feature only requires a primary
 
   storage:
     size: 1Gi
