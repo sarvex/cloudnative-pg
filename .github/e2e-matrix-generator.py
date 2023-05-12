@@ -47,9 +47,7 @@ class MajorVersionList(dict):
     """List of major versions, with multiple patch levels"""
 
     def __init__(self, version_lists: Dict[str, List[str]]):
-        sorted_versions = {
-            k: VersionList(version_lists[k]) for k in version_lists.keys()
-        }
+        sorted_versions = {k: VersionList(version_lists[k]) for k in version_lists}
         super().__init__(sorted_versions)
         self.versions = list(self.keys())
 
@@ -70,7 +68,7 @@ def filter_version(versions_list, version_range):
     max_version = version_range["max"] or "99.99"
     return list(
         filter(
-            lambda x: max_version >= re.sub(r"v", "", x)[0:4] >= min_version,
+            lambda x: max_version >= re.sub(r"v", "", x)[:4] >= min_version,
             versions_list,
         )
     )
@@ -267,8 +265,8 @@ if __name__ == "__main__":
                 sorted(ENGINE_MODES[engine][args.mode](), key=itemgetter("id"))
             )
         for job in include:
-            job["id"] = engine + "-" + job["id"]
+            job["id"] = f"{engine}-" + job["id"]
             print(f"Generating {engine}: {job['id']}", file=sys.stderr)
         with open(os.getenv("GITHUB_OUTPUT"), 'a') as env:
             print(f"{engine}Matrix=" + json.dumps({"include": include}), file=env)
-            print(f"{engine}Enabled=" + str(len(include) > 0), file=env)
+            print(f"{engine}Enabled={len(include) > 0}", file=env)

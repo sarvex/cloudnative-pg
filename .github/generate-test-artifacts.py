@@ -27,8 +27,7 @@ def flatten(arr):
     out = []
     for l in arr:
         if isinstance(l, list):
-            for item in l:
-                out.append(item)
+            out.extend(iter(l))
         else:
             print("unexpected hierarchy labels")
             print(arr)
@@ -74,8 +73,10 @@ def convert_ginkgo_test(t, matrix):
     if branch == "":
         branch = matrix["refname"]
 
-    x = {
-        "name": " - ".join(t["ContainerHierarchyTexts"]) + " -- " + t["LeafNodeText"],
+    return {
+        "name": " - ".join(t["ContainerHierarchyTexts"])
+        + " -- "
+        + t["LeafNodeText"],
         "state": state,
         "start_time": t["StartTime"],
         "end_time": t[
@@ -93,7 +94,6 @@ def convert_ginkgo_test(t, matrix):
         "repo": matrix["repo"],
         "branch": branch,
     }
-    return x
 
 
 def write_artifact(artifact, matrix):
@@ -113,7 +113,7 @@ def write_artifact(artifact, matrix):
     h = hashlib.sha224(slug.encode("utf-8")).hexdigest()
     filename = matrix["id"] + "_" + h + ".json"
     if dir != "":
-        filename = dir + "/" + filename
+        filename = f"{dir}/{filename}"
     with open(filename, "w") as f:
         f.write(json.dumps(artifact))
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
             matrix,
             "Open Ginkgo report",
             "failed",
-            "ginkgo Report Not Found: " + args.file,
+            f"ginkgo Report Not Found: {args.file}",
         )
         write_artifact(artifact, matrix)
         exit(0)

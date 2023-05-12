@@ -29,15 +29,17 @@ pg_versions_file = ".github/pg_versions.json"
 
 
 def get_json(repo_name):
-    data = check_output([
-        "docker",
-        "run",
-        "--rm",
-        "quay.io/skopeo/stable",
-        "list-tags",
-        "docker://ghcr.io/{}".format(pg_repo_name)])
-    repo_json = json.loads(data.decode("utf-8"))
-    return repo_json
+    data = check_output(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "quay.io/skopeo/stable",
+            "list-tags",
+            f"docker://ghcr.io/{pg_repo_name}",
+        ]
+    )
+    return json.loads(data.decode("utf-8"))
 
 
 def is_pre_release(v):
@@ -67,24 +69,18 @@ def write_json(repo_url, version_re, output_file):
         if int(major) < min_supported_major:
             continue
 
-        # We normally want to handle only versions without the '-' inside
-        extra = match.group(2)
-        if not extra:
-            if major not in results:
-                results[major] = [item]
-            elif len(results[major]) < 2:
-                results[major].append(item)
-        # But we keep the highest version with the '-' in case we have not enough other versions
-        else:
+        if extra := match.group(2):
             if major not in extra_results:
                 extra_results[major] = item
 
+        elif major not in results:
+            results[major] = [item]
+        elif len(results[major]) < 2:
+            results[major].append(item)
     # If there are not enough version without '-` inside we add the one we kept
-    for major in results:
-        if len(results[major]) < 2:
+    for major, value in results.items():
+        if len(value) < 2:
             results[major].append(extra_results[major])
-        # You cannot update between pre-release versions. If one of the two values is a pre-release
-        # make sure to update between two different names of the most recent version (it might be a release)
         elif is_pre_release(results[major][0]) or is_pre_release(results[major][1]):
             results[major] = [results[major][0], extra_results[major]]
 
